@@ -1,0 +1,1 @@
+Antes de sugerir cambios en este repositorio, sigue las reglas de `AGENTS.md` y la arquitectura descrita en `README.md`. Nunca escribas secretos en el código ni uses como entrada del modelo las columnas prohibidas listadas en `AGENTS.md`.

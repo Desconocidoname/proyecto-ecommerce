@@ -1,0 +1,59 @@
+# Los 5 servicios del sistema. Cada servicio necesita su Dockerfile en su carpeta.
+# Uso:  docker compose up --build
+services:
+  db:
+    image: postgres:16
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+      - ./data/raw:/data:ro
+    ports:
+      - "5432:5432"   # solo para desarrollo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+    networks: [churn-net]
+
+  ml-service:
+    build: ./ml/serving
+    env_file: .env
+    volumes:
+      - models:/models
+    networks: [churn-net]
+
+  backend:
+    build: ./backend
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+    networks: [churn-net]
+
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports:
+      - "3000:80"
+    networks: [churn-net]
+
+  training:
+    build: ./ml/training
+    env_file: .env
+    volumes:
+      - models:/models
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["training"]   # no arranca con "up"; se ejecuta con "run"
+    networks: [churn-net]
+
+networks:
+  churn-net:
+
+volumes:
+  pgdata:
+  models:
