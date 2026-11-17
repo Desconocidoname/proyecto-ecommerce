@@ -3,27 +3,35 @@
 .env.*
 !.env.example
 
-# Datos y modelos (se generan o se comparten por fuera de Git)
+# Entorno de Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Datos: el CSV original SÍ se versiona (reproducibilidad, Entrega 3);
+# los datos procesados se regeneran con preparar_datos.py.
 data/raw/*
-data/processed/*
-ml/models/*
 !data/raw/.gitkeep
+!data/raw/customers.csv
+data/processed/*
 !data/processed/.gitkeep
+
+# Modelos: se versionan los artefactos del entrenamiento (Entrega 3).
+ml/models/*
 !ml/models/.gitkeep
+!ml/models/*.joblib
+!ml/models/metadata.json
+!ml/models/experimentos.csv
+!ml/models/matriz_confusion.png
 
 # Node
 node_modules/
 dist/
 npm-debug.log*
 
-# Python
-__pycache__/
-*.pyc
-.venv/
-.ipynb_checkpoints/
-
 # Sistema y editores
 .DS_Store
 .vscode/
 .idea/
-.venv/
