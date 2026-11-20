@@ -7,9 +7,9 @@ import {
   dinero, fecha, num, pct, useAviso, useDatos,
 } from '../componentes/ui.jsx';
 
-function Kpi({ etiqueta, valor, unidad, detalle }) {
+function Kpi({ etiqueta, valor, unidad, detalle, destacado }) {
   return (
-    <div className="card kpi">
+    <div className={`card kpi${destacado ? ' destacado' : ''}`}>
       <div className="l">{etiqueta}</div>
       <div className="v">{valor}{unidad && <small>{unidad}</small>}</div>
       {detalle && <div className="d">{detalle}</div>}
@@ -69,7 +69,7 @@ export default function Resumen({ alCambiarAlertas }) {
       <div className="grid kpis">
         <Kpi etiqueta="Clientes totales" valor={num(kpis.clientes)} detalle={`Gasto promedio ${dinero(kpis.gastoPromedio)}`} />
         <Kpi etiqueta="Inactivos" valor={num(kpis.inactivos)} detalle={`${pct(kpis.inactivos / (kpis.clientes || 1))} · 90 días o más sin comprar`} />
-        <Kpi etiqueta="En alerta" valor={num(kpis.alertas)} detalle={sinPrediccion ? 'Sin predicciones todavía' : 'Activos con riesgo alto'} />
+        <Kpi destacado etiqueta="En alerta" valor={num(kpis.alertas)} detalle={sinPrediccion ? 'Sin predicciones todavía' : 'Activos con riesgo alto'} />
         <Kpi etiqueta="Cupones enviados" valor={num(kpis.cuponesEnviados)} detalle={`Satisfacción promedio ${kpis.satisfaccion?.toFixed(1) ?? '—'} de 5`} />
       </div>
 
@@ -114,9 +114,9 @@ export default function Resumen({ alCambiarAlertas }) {
 
       {!sinPrediccion && (
         <div className="grid charts">
-          <Grafica titulo="Alertas por lealtad" sub="Clientes en alerta por nivel"><Barras filas={datos.alertasPorLealtad} /></Grafica>
-          <Grafica titulo="Alertas por satisfacción" sub="Calificación de 1 a 5"><Columnas filas={datos.alertasPorSatisfaccion} /></Grafica>
-          <Grafica titulo="Países con más alertas" sub="Los 6 países principales"><Barras filas={datos.paisesConMasAlertas} /></Grafica>
+          <Grafica titulo="Alertas por lealtad" sub="Clientes en alerta por nivel"><Barras tono="alerta" filas={datos.alertasPorLealtad} /></Grafica>
+          <Grafica titulo="Alertas por satisfacción" sub="Calificación de 1 a 5"><Columnas tono="alerta" filas={datos.alertasPorSatisfaccion} /></Grafica>
+          <Grafica titulo="Países con más alertas" sub="Los 6 países principales"><Barras tono="alerta" filas={datos.paisesConMasAlertas} /></Grafica>
         </div>
       )}
     </div>

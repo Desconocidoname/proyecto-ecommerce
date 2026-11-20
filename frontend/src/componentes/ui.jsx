@@ -75,11 +75,11 @@ function useAnimado() {
   return listo;
 }
 
-export function Barras({ filas }) {
+export function Barras({ filas, tono }) {
   const listo = useAnimado();
   const max = Math.max(1, ...filas.map((f) => f.clientes));
   return (
-    <div className="bars">
+    <div className={`bars${tono ? ` ${tono}` : ''}`}>
       {filas.map((f) => (
         <div className="bar" key={f.nombre}>
           <span title={f.nombre}>{f.etiqueta ?? f.nombre}</span>
@@ -91,11 +91,11 @@ export function Barras({ filas }) {
   );
 }
 
-export function Columnas({ filas }) {
+export function Columnas({ filas, tono }) {
   const listo = useAnimado();
   const max = Math.max(1, ...filas.map((f) => f.clientes));
   return (
-    <div className="cols">
+    <div className={`cols${tono ? ` ${tono}` : ''}`}>
       {filas.map((f) => (
         <div className="col" key={f.nombre}>
           <b>{num(f.clientes)}</b>
