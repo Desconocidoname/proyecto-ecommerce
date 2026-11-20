@@ -14,7 +14,7 @@ Este archivo es para cualquier asistente de programación (Claude Code, Cursor, 
 - `frontend/`: React + Vite servido con Nginx. Solo llama al backend en `/api/*`. No contiene lógica de IA ni acceso a la base de datos.
 - `backend/`: Node.js + Express. Único servicio que consulta PostgreSQL y que llama al servicio de IA.
 - `ml/serving/`: FastAPI. Expone `predecir(datos_entrada: dict) -> dict` mediante `POST /predict`.
-- `ml/training/`: entrenamiento manual con scikit-learn; guarda el modelo en el volumen `models`.
+- `ml/training/`: entrenamiento manual con scikit-learn (contenedor `training`); guarda el modelo en `ml/models/`, que el servicio de IA lee en solo lectura.
 - `db/init/`: scripts SQL que PostgreSQL ejecuta al crear la base de datos.
 - Los servicios se comunican por nombre dentro de la red de Docker (`db`, `backend`, `ml-service`), nunca por `localhost`.
 
@@ -24,7 +24,7 @@ Este archivo es para cualquier asistente de programación (Claude Code, Cursor, 
 - **Fuga de datos:** el modelo nunca usa estas columnas como entrada: `days_since_last_purchase`, `activity_status`, `recency_score`, `frequency_score`, `rfm_score`, `rfm_category`, `purchase_frequency`, `behavior_segment`, `segment_category`, `churn_risk_score`, `churn_risk_category`, `customer_health_score`, `health_status`.
 - **Objetivo:** `riesgo = 1` si `churn_risk_score >= 40`. Partición 80/20 estratificada con `random_state = 42`.
 - **Contratos:** no cambies nombres de endpoints, campos JSON ni tablas sin que el usuario lo confirme, porque otros integrantes dependen de ellos.
-- **Datos y modelos:** no agregues a Git nada de `data/raw/`, `data/processed/` ni `ml/models/`.
+- **Datos y modelos:** `data/raw/customers.csv` y los artefactos de `ml/models/` sí se versionan (reproducibilidad). `data/processed/` nunca se sube: se regenera.
 - **Alcance:** no agregues funcionalidades, librerías grandes ni servicios nuevos que no estén en la Entrega 2 sin preguntar.
 
 ## Estilo

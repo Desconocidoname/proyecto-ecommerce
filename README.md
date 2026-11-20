@@ -8,6 +8,41 @@ Dashboard web para el administrador de una tienda en línea. Un modelo de IA (Ra
 
 ---
 
+## Guía rápida para ejecutar el sistema
+
+**Requisitos:** Git y Docker con Docker Compose v2. No hace falta instalar Python ni Node: todo corre en contenedores.
+
+```bash
+git clone https://github.com/Desconocidoname/proyecto-ecommerce.git
+cd proyecto-ecommerce
+cp .env.example .env
+docker compose up -d --build
+```
+
+Abre `http://localhost:3000`. La primera vez tarda unos minutos: se construyen las imágenes, la base de datos carga los 50,000 clientes y el backend calcula sus predicciones.
+
+**Credenciales de prueba (local):** las de `.env.example`: correo `admin@tienda.com` y contraseña `cambia_esta_contrasena`.
+
+**Rama final congelada:** `main`, etiqueta `v1.0`.
+
+| Pieza | Tecnología y versión exacta | Dependencias |
+|---|---|---|
+| Entrenamiento | Python 3.12 · scikit-learn 1.6.1 · pandas 2.2.3 · numpy 2.2.1 · matplotlib 3.10.0 | `ml/training/requirements.txt` |
+| Servicio de IA | Python 3.12 · FastAPI 0.115.6 · Uvicorn 0.34.0 · scikit-learn 1.6.1 | `ml/serving/requirements.txt` |
+| Backend | Node.js 22 · Express 4.21.2 · pg 8.13.1 | `backend/package.json` |
+| Frontend | React 18.3.1 · Vite 5.4.11 · qrcode 1.5.4 · Nginx 1.27 | `frontend/package.json` |
+| Base de datos | PostgreSQL 16 | `db/init/*.sql` |
+| Orquestación | Docker Compose v2 · red `churn-net` | `docker-compose.yml` |
+
+| Comando | Para qué |
+|---|---|
+| `docker compose up -d --build` | Arrancar todo |
+| `docker compose down` | Apagar todo (los datos se conservan) |
+| `docker compose run --rm --build training` | Reentrenar el modelo (opcional; el modelo ya viene entrenado en `ml/models/`) |
+| `python3 pruebas/probar_sistema.py` | Prueba integral del sistema y de la IA |
+
+---
+
 ## Índice
 
 1. [Documentación del proyecto](#1-documentación-del-proyecto)
