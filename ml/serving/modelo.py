@@ -49,6 +49,36 @@ def _etiqueta(probabilidad: float, umbral: float) -> str:
     return "Riesgo medio" if probabilidad >= umbral * 0.6 else "Riesgo bajo"
 
 
+def _validar(entrada, features: list[str]) -> tuple[dict | None, dict | None]:
+    """Revisa campos completos, tipos y rangos. Devuelve (limpio, error)."""
+    if not isinstance(entrada, dict):
+        return None, _error("La entrada debe ser un diccionario con las variables del cliente")
+    for campo in features:
+        if campo not in entrada or entrada[campo] in (None, ""):
+            return None, _error(f"Falta el campo {campo}", campo)
+    limpio = {}
+    for campo in features:
+        valor = entrada[campo]
+        if campo in RANGOS:
+            try:
+                valor = float(valor)
+            except (TypeError, ValueError):
+                return None, _error(f"{campo} debe ser un número", campo)
+            minimo, maximo = RANGOS[campo]
+            if not minimo <= valor <= maximo:
+                return None, _error(f"{campo} fuera de rango", campo, f"{minimo}-{maximo}")
+        else:
+            valor = str(valor)
+        limpio[campo] = valor
+    return limpio, None
+
+
+def info_modelo() -> dict:
+    """Metadatos del modelo vigente (versión, umbral, métricas, variables)."""
+    _, meta = _artefactos()
+    return meta
+
+
 def predecir(entrada: dict) -> dict:
     """Estima el riesgo de abandono de un cliente.
 
@@ -67,27 +97,10 @@ def predecir(entrada: dict) -> dict:
     except FileNotFoundError:
         return _error(f"No hay modelo entrenado en {MODEL_DIR}. Ejecuta ml/training/train.py")
 
-    if not isinstance(entrada, dict):
-        return _error("La entrada debe ser un diccionario con las variables del cliente")
-
     # 1. Validación: campos completos, tipos y rangos
-    for campo in meta["features"]:
-        if campo not in entrada or entrada[campo] in (None, ""):
-            return _error(f"Falta el campo {campo}", campo)
-    limpio = {}
-    for campo in meta["features"]:
-        valor = entrada[campo]
-        if campo in RANGOS:
-            try:
-                valor = float(valor)
-            except (TypeError, ValueError):
-                return _error(f"{campo} debe ser un número", campo)
-            minimo, maximo = RANGOS[campo]
-            if not minimo <= valor <= maximo:
-                return _error(f"{campo} fuera de rango", campo, f"{minimo}-{maximo}")
-        else:
-            valor = str(valor)
-        limpio[campo] = valor
+    limpio, error = _validar(entrada, meta["features"])
+    if error:
+        return error
 
     # 2. DataFrame con las columnas en el mismo orden que en el entrenamiento
     fila = pd.DataFrame([limpio], columns=meta["features"])
@@ -106,5 +119,55 @@ def predecir(entrada: dict) -> dict:
         "confianza_o_score": round(probabilidad if prediccion else 1 - probabilidad, 3),
         "umbral": umbral,
         "modelo_version": meta["version"],
+        "tiempo_ms": round((time.perf_counter() - inicio) * 1000, 1),
+    }
+
+
+def predecir_lote(clientes: list[dict]) -> dict:
+    """Estima el riesgo de varios clientes en una sola llamada al modelo.
+
+    Lo usa el backend para la predicción masiva de los 50,000 clientes: es
+    mucho más rápido predecir 2,000 filas juntas que 2,000 veces una fila.
+
+    Parámetros:
+        clientes (list[dict]): cada elemento trae customer_id y las 30 variables.
+
+    Retorna:
+        dict: versión del modelo, umbral, lista de predicciones y lista de
+        errores (clientes que no pasaron la validación, con el campo y el rango).
+    """
+    inicio = time.perf_counter()
+    modelo, meta = _artefactos()
+    umbral = float(meta["umbral"])
+
+    validos, ids, errores = [], [], []
+    for posicion, cliente in enumerate(clientes):
+        limpio, error = _validar(cliente, meta["features"])
+        cid = cliente.get("customer_id") if isinstance(cliente, dict) else None
+        if error:
+            errores.append({"customer_id": cid, "posicion": posicion, **error})
+        else:
+            validos.append(limpio)
+            ids.append(cid)
+
+    predicciones = []
+    if validos:
+        filas = pd.DataFrame(validos, columns=meta["features"])
+        probabilidades = modelo.predict_proba(filas)[:, 1]
+        for cid, p in zip(ids, probabilidades):
+            p = float(p)
+            predicciones.append({
+                "customer_id": cid,
+                "probabilidad_riesgo": round(p, 4),
+                "prediccion": int(p >= umbral),
+                "clase_etiqueta": _etiqueta(p, umbral),
+            })
+
+    return {
+        "status": "success",
+        "modelo_version": meta["version"],
+        "umbral": umbral,
+        "predicciones": predicciones,
+        "errores": errores,
         "tiempo_ms": round((time.perf_counter() - inicio) * 1000, 1),
     }

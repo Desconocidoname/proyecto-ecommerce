@@ -36,3 +36,20 @@ def test_campo_faltante_devuelve_error():
 def test_inferencia_tarda_menos_de_3_segundos():
     predecir(ENTRADA)                      # carga del modelo
     assert predecir(ENTRADA)["tiempo_ms"] < 3000   # RNF-01
+
+
+def test_lote_predice_varios_y_reporta_errores():
+    from modelo import predecir_lote
+    bueno = {**ENTRADA, "customer_id": "CUST-013446"}
+    malo = {**ENTRADA, "customer_id": "CUST-000001", "satisfaction_score": 9}
+    r = predecir_lote([bueno, malo])
+    assert r["status"] == "success"
+    assert len(r["predicciones"]) == 1 and r["predicciones"][0]["customer_id"] == "CUST-013446"
+    assert r["errores"][0]["campo"] == "satisfaction_score"
+
+
+def test_lote_da_lo_mismo_que_uno_por_uno():
+    from modelo import predecir, predecir_lote
+    uno = predecir(ENTRADA)["probabilidad_riesgo"]
+    lote = predecir_lote([{**ENTRADA, "customer_id": "X"}])["predicciones"][0]["probabilidad_riesgo"]
+    assert round(lote, 3) == uno
