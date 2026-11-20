@@ -20,7 +20,12 @@ services:
     build: ./ml/serving
     env_file: .env
     volumes:
-      - models:/models
+      - ./ml/models:/models:ro   # el modelo entrenado, solo lectura
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      start_period: 20s
+      retries: 10
     networks: [churn-net]
 
   backend:
@@ -57,4 +62,3 @@ networks:
 
 volumes:
   pgdata:
-  models:
