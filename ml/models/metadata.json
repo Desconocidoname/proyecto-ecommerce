@@ -1,9 +1,9 @@
 {
   "version": "v1",
-  "entrenado": "2026-11-17T02:14:02+00:00",
+  "entrenado": "2026-11-20T06:17:27+00:00",
   "modelo": "Random Forest",
-  "hiperparametros": "n_estimators=300, max_depth=12, min_samples_leaf=20, class_weight='balanced'",
-  "umbral": 0.5,
+  "hiperparametros": "n_estimators=300, min_samples_leaf=5, class_weight='balanced'",
+  "umbral": 0.42,
   "features": [
     "age",
     "tenure_months",
@@ -37,27 +37,27 @@
     "engagement_level"
   ],
   "metricas_test": {
-    "f1": 0.679,
-    "precision": 0.634,
-    "recall": 0.731,
-    "roc_auc": 0.875,
-    "pr_auc": 0.75
+    "f1": 0.691,
+    "precision": 0.67,
+    "recall": 0.713,
+    "roc_auc": 0.873,
+    "pr_auc": 0.741
   },
-  "f1_train": 0.752,
+  "f1_train": 0.869,
   "clientes_train": 40000,
   "clientes_test": 10000,
   "semilla": 42,
   "importancia_variables": {
-    "satisfaction_score": 0.524,
-    "return_count": 0.1709,
-    "complaint_count": 0.1295,
-    "total_purchases": 0.024,
-    "customer_lifetime_value_usd": 0.0137,
-    "total_spent_usd": 0.0135,
-    "customer_profitability_usd": 0.0127,
-    "avg_order_value_usd": 0.0112,
-    "customer_acquisition_cost_usd": 0.0087,
-    "email_open_rate": 0.0083
+    "satisfaction_score": 0.3277,
+    "return_count": 0.1174,
+    "complaint_count": 0.0881,
+    "total_purchases": 0.0314,
+    "avg_order_value_usd": 0.0268,
+    "customer_lifetime_value_usd": 0.0267,
+    "customer_acquisition_cost_usd": 0.0266,
+    "total_spent_usd": 0.0265,
+    "customer_profitability_usd": 0.0263,
+    "click_through_rate": 0.0257
   },
-  "scikit_learn": "1.9.1"
+  "scikit_learn": "1.6.1"
 }
