@@ -1,5 +1,23 @@
-# Los 5 servicios del sistema. Cada servicio necesita su Dockerfile en su carpeta.
-# Uso:  docker compose up --build
+# =====================================================================
+# Los 5 servicios del sistema "Retención" y su red interna.
+#
+#   Navegador ─► frontend:80 (publicado en localhost:3000)
+#                   │  /api/*
+#                   ▼
+#               backend:4000 ─► db:5432 (PostgreSQL)
+#                   │
+#                   ▼
+#               ml-service:8000 ◄── ml/models/ ◄── training (bajo demanda)
+#
+# Todos están en la red "churn-net" y se encuentran por su NOMBRE de servicio
+# (db, backend, ml-service), nunca por localhost. Solo el frontend se abre
+# hacia afuera; db publica 5432 solo para revisar los datos en desarrollo.
+#
+# Uso:
+#   docker compose up -d --build                          # levantar todo
+#   docker compose run --rm --build --user "$(id -u):$(id -g)" training   # reentrenar
+#   docker compose restart ml-service backend             # usar el modelo nuevo
+# =====================================================================
 services:
   db:
     image: postgres:16
@@ -14,6 +32,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       retries: 10
+    restart: unless-stopped
     networks: [churn-net]
 
   ml-service:
@@ -26,6 +45,7 @@ services:
       interval: 10s
       start_period: 20s
       retries: 10
+    restart: unless-stopped
     networks: [churn-net]
 
   backend:
@@ -41,6 +61,7 @@ services:
       interval: 10s
       start_period: 10s
       retries: 10
+    restart: unless-stopped
     networks: [churn-net]
 
   frontend:
@@ -50,6 +71,7 @@ services:
         condition: service_healthy
     ports:
       - "3000:80"
+    restart: unless-stopped
     networks: [churn-net]
 
   training:
@@ -66,6 +88,7 @@ services:
 
 networks:
   churn-net:
+    name: churn-net
 
 volumes:
   pgdata:
