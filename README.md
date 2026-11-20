@@ -45,9 +45,9 @@ Navegador ──► frontend (React) ──► backend (Node) ──► ml-servi
 - El **navegador** solo habla con el `frontend`. El `frontend` solo habla con el `backend`.
 - El **backend** es el único que consulta la base de datos y el único que llama al servicio de IA.
 - El **servicio de IA** carga el modelo entrenado y expone la función `predecir(datos_entrada) -> resultado`.
-- El **entrenamiento** se ejecuta a mano: lee los clientes de la base de datos, entrena el Random Forest y guarda el modelo en un volumen que el servicio de IA lee.
+- El **entrenamiento** se ejecuta a mano: lee los clientes de la base de datos, entrena el Random Forest y guarda el modelo en `ml/models/`, carpeta que el servicio de IA lee en modo solo lectura.
 - Todo corre con **Docker Compose** en una red interna. Solo el `frontend` se abre en `http://localhost:3000`.
-- El QR de los cupones lleva a una página pública aparte (repositorio `cupon`, publicado con GitHub Pages), fuera de Docker.
+- El QR de los cupones lleva a la **página pública del cupón**, que es una ruta del propio frontend (`/cupon/VUELVE-XXXXX`) y lee el cupón del backend (`GET /api/publico/cupon/:codigo`, sin sesión y sin datos personales).
 
 **El modelo en una línea:** clasifica a cada cliente como «en riesgo» o «sin riesgo» con una probabilidad de 0 a 1. Un cliente aparece en Alertas si su probabilidad supera el umbral y lleva menos de 90 días sin comprar.
 
@@ -70,10 +70,10 @@ proyecto-ecommerce/
 ├── ml/
 │   ├── training/        ← análisis, limpieza y train.py            (Juan Daniel)
 │   ├── serving/         ← FastAPI con predecir()                   (Ángel)
-│   └── models/          ← modelo entrenado (no se sube a Git)
+│   └── models/          ← modelo entrenado (se versiona)
 ├── data/
-│   ├── raw/             ← CSV original (no se sube a Git)
-│   └── processed/       ← datos limpios (no se suben a Git)
+│   ├── raw/             ← CSV original (se versiona)
+│   └── processed/       ← train.csv y test.csv (se regeneran, no se suben)
 └── docs/
     └── entregas/        ← PDFs de las entregas
 ```
@@ -98,12 +98,11 @@ git clone <URL del repositorio>     # cópiala del botón verde "Code" en GitHub
 cd proyecto-ecommerce
 ```
 
-1. **Datos:** descarga el CSV de la carpeta compartida del equipo y guárdalo como `data/raw/customers.csv` (ese nombre exacto, sin espacios).
-2. **Variables de entorno:** `cp .env.example .env` y pide los valores reales al equipo (sección 5).
-3. **Levantar el sistema:** `docker compose up --build`
-4. Abre `http://localhost:3000`.
+1. **Variables de entorno:** `cp .env.example .env` y pide los valores reales al equipo (sección 5). Genera tu `SESSION_SECRET` con `openssl rand -hex 32`.
+2. **Levantar el sistema:** `docker compose up -d --build`. La primera vez la base carga los 50,000 clientes y el backend calcula sus predicciones (menos de un minuto).
+3. Abre `http://localhost:3000` y entra con `ADMIN_EMAIL` y `ADMIN_PASSWORD` de tu `.env`.
 
-> Los pasos 3 y 4 funcionan cuando cada servicio tenga su `Dockerfile`. Mientras tanto, cada responsable trabaja en su carpeta.
+El CSV (`data/raw/customers.csv`) y el modelo entrenado (`ml/models/`) ya vienen en el repositorio.
 
 ### Comandos útiles
 
@@ -112,8 +111,10 @@ cd proyecto-ecommerce
 | Levantar todo en segundo plano | `docker compose up -d --build` |
 | Ver el estado de los servicios | `docker compose ps` |
 | Ver los registros de un servicio | `docker compose logs -f backend` |
-| Entrenar el modelo | `docker compose --profile training run --rm training` |
-| Cargar el modelo nuevo en el servicio de IA | `docker compose restart ml-service` |
+| Entrenar el modelo | `docker compose run --rm --build --user "$(id -u):$(id -g)" training` |
+| Usar el modelo nuevo (y recalcular las predicciones) | `docker compose restart ml-service backend` |
+| Aplicar las vistas del dashboard a una base que ya existía | `docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < db/init/03_dashboard.sql` |
+| Ver la red interna y sus contenedores | `docker network inspect churn-net` |
 | Entrar a la base de datos | `docker compose exec db psql -U churn -d churn` |
 | Apagar todo | `docker compose down` |
 | Borrar la base de datos y recargar el CSV desde cero | `docker compose down -v && docker compose up -d` |
