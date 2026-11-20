@@ -38,6 +38,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from columnas import CATEGORICAS, FEATURES, ID, NUMERICAS, OBJETIVO, SEMILLA  # noqa: E402
+from graficas import generar_graficas  # noqa: E402
 
 VERSION = "v1"
 RECALL_MINIMO = 0.70      # compromiso de la Entrega 2
@@ -273,6 +274,7 @@ def main() -> None:
         "scikit_learn": sklearn.__version__,
     }
     (salida / "metadata.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False))
+    graficas = generar_graficas(pipe_final, test[FEATURES], test[OBJETIVO], umbral, top, salida, baseline_pipe)
 
     for archivo, que in [("modelo_candidato_rf.joblib", "Modelo ganador (preprocesamiento + Random Forest)"),
                          ("modelo_baseline_lr.joblib", "Modelo baseline (Regresión Logística)"),
@@ -281,6 +283,8 @@ def main() -> None:
                          ("experimentos.csv", "Matriz de experimentación"),
                          ("matriz_confusion.png", "Matriz de confusión")]:
         log("SUCCESS", f"{que} guardado en: {salida / archivo}")
+    for archivo in graficas:
+        log("SUCCESS", f"Gráfica guardada en: {salida / archivo}")
 
 
 if __name__ == "__main__":
