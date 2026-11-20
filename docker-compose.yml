@@ -44,7 +44,8 @@ services:
     build: ./ml/training
     env_file: .env
     volumes:
-      - models:/models
+      - ./ml/models:/models                       # aquí guarda los modelos
+      - ./data/processed:/app/data/processed      # train.csv y test.csv
     depends_on:
       db:
         condition: service_healthy

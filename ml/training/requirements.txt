@@ -1,8 +1,11 @@
-joblib==1.6.0
-matplotlib==3.11.2
-pandas==3.1.0
-psycopg==3.3.6
-psycopg-binary==3.3.6
-pytest==9.2.0
-scikit-learn==1.9.1
-SQLAlchemy==2.1.6
+# Versiones fijas para la imagen Docker (python:3.12-slim).
+# El servicio de IA (ml/serving) usa las MISMAS versiones de numpy, pandas,
+# scikit-learn y joblib: un modelo guardado con una versión de scikit-learn
+# debe cargarse con esa misma versión.
+numpy==2.2.1
+pandas==2.2.3
+scikit-learn==1.6.1
+joblib==1.4.2
+matplotlib==3.10.0
+sqlalchemy==2.0.36
+psycopg[binary]==3.2.3

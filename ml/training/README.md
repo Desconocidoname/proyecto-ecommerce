@@ -4,11 +4,27 @@ Preparación de datos, entrenamiento y experimentación del modelo.
 
 **Responsable:** Juan Daniel Ladino Hernández · **Respaldo:** Ángel De Anda Gómez
 
-## Reproducir todo con un solo comando (desde la raíz del repositorio)
+## Entrenar con Docker (forma recomendada)
+
+Desde la raíz del repositorio, con la base de datos encendida:
 
 ```bash
-python ml/training/preparar_datos.py --csv data/raw/customers.csv && python ml/training/train.py --data data/processed --output ml/models
+docker compose up -d db
+docker compose run --rm --build --user "$(id -u):$(id -g)" training
 ```
+
+El contenedor lee los clientes de PostgreSQL (vista `v_entrenamiento`), divide 80/20 y guarda los modelos en `ml/models/` de tu computadora. `--user` hace que los archivos generados sean tuyos y no del usuario `root`.
+
+Después de reentrenar, reinicia el servicio de IA para que cargue el modelo nuevo: `docker compose restart ml-service`.
+
+## Entrenar sin Docker (opcional)
+
+```bash
+python ml/training/preparar_datos.py --csv data/raw/customers.csv
+python ml/training/train.py --data data/processed --output ml/models
+```
+
+Si entrenas sin Docker, tu versión local de scikit-learn debe ser la misma que la de `requirements.txt` (1.6.1); si no, el servicio de IA no podrá abrir el modelo.
 
 ## Cómo fluyen los datos
 
@@ -25,7 +41,9 @@ data/raw/customers.csv ─► preparar_datos.py ─► data/processed/train.csv 
 | `columnas.py` | Lista única de las 30 columnas de entrada, la variable objetivo, las columnas de fuga, el umbral (40) y la semilla (42). |
 | `preparar_datos.py` | Lee el CSV (o la vista `v_entrenamiento`), valida que no haya fuga ni nulos y divide 80/20 estratificado. |
 | `train.py` | Entrena y compara Regresión Logística (baseline) y Random Forest (3 configuraciones), elige el ganador con una validación interna y guarda los resultados. |
-| `requirements.txt` | Librerías con versiones fijas. |
+| `requirements.txt` | Librerías con versiones fijas (las mismas que usa `ml/serving`). |
+| `entrenar.sh` | Pasos que ejecuta el contenedor: preparar datos y entrenar. |
+| `Dockerfile` | Imagen del job de entrenamiento (`python:3.12-slim`). |
 
 ## Qué genera `train.py` en `ml/models/`
 

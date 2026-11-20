@@ -1,5 +1,6 @@
 experimento,modelo,hiperparametros,umbral,f1_validacion,f1_train,f1_test,precision_test,recall_test,roc_auc_test,pr_auc_test,entrenamiento_s,inferencia_ms_por_cliente,diagnostico
-Exp 1: Baseline,Regresión Logística,"C=1.0, penalización L2, class_weight='balanced'",0.5,0.601,0.616,0.619,0.515,0.775,0.839,0.678,0.25,0.0023,"Underfitting (no supera la regla manual, F1 0.626)"
-Exp 2: RF por defecto,Random Forest,"n_estimators=100, max_depth=None, min_samples_leaf=1",0.5,0.622,1.0,0.657,0.728,0.6,0.871,0.74,8.31,0.0068,"Overfitting (F1 1.00 en train, 0.66 en test)"
-Exp 3: RF regularizado,Random Forest,"n_estimators=300, min_samples_leaf=5, class_weight='balanced'",0.5,0.684,0.866,0.694,0.684,0.705,0.874,0.747,22.22,0.0145,"Overfitting (F1 0.87 en train, 0.69 en test)"
-Exp 4: RF ajustado,Random Forest,"n_estimators=300, max_depth=12, min_samples_leaf=20, class_weight='balanced'",0.5,0.677,0.752,0.679,0.634,0.731,0.875,0.75,7.91,0.011,"Modelo ganador · Óptimo (F1 0.75 en train, 0.68 en test)"
+Exp 1: Baseline,Regresión Logística,"C=1.0, penalización L2, class_weight='balanced'",0.5,0.602,0.617,0.616,0.514,0.768,0.835,0.672,0.29,0.0028,"Underfitting (no supera la regla manual, F1 0.626)"
+Exp 2: RF por defecto,Random Forest,"n_estimators=100, max_depth=None, min_samples_leaf=1",0.5,0.623,1.0,0.648,0.726,0.586,0.872,0.74,10.23,0.0073,"Overfitting (F1 1.00 en train, 0.65 en test)"
+Exp 3: RF regularizado,Random Forest,"n_estimators=300, min_samples_leaf=5, class_weight='balanced'",0.5,0.684,0.839,0.699,0.704,0.695,0.873,0.741,25.4,0.0145,"Óptimo (F1 0.84 en train, 0.70 en test)"
+Exp 4: RF ajustado,Random Forest,"n_estimators=300, max_depth=12, min_samples_leaf=20, class_weight='balanced'",0.5,0.671,0.736,0.693,0.672,0.715,0.873,0.742,8.49,0.011,"Óptimo (F1 0.74 en train, 0.69 en test)"
+Exp 5: Ganador + umbral ajustado,Random Forest,"n_estimators=300, min_samples_leaf=5, class_weight='balanced', umbral=0.42",0.42,0.684,0.869,0.691,0.67,0.713,0.873,0.741,25.4,0.0145,"Modelo ganador · Overfitting (F1 0.87 en train, 0.69 en test)"
