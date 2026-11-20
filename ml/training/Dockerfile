@@ -15,7 +15,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Después el código
-COPY columnas.py preparar_datos.py train.py entrenar.sh ./
+COPY columnas.py preparar_datos.py train.py graficas.py entrenar.sh ./
 RUN chmod +x entrenar.sh
 
 CMD ["./entrenar.sh"]

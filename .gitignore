@@ -24,7 +24,7 @@ ml/models/*
 !ml/models/*.joblib
 !ml/models/metadata.json
 !ml/models/experimentos.csv
-!ml/models/matriz_confusion.png
+!ml/models/*.png
 
 # Node
 node_modules/

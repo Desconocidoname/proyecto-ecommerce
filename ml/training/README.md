@@ -41,6 +41,7 @@ data/raw/customers.csv ─► preparar_datos.py ─► data/processed/train.csv 
 | `columnas.py` | Lista única de las 30 columnas de entrada, la variable objetivo, las columnas de fuga, el umbral (40) y la semilla (42). |
 | `preparar_datos.py` | Lee el CSV (o la vista `v_entrenamiento`), valida que no haya fuga ni nulos y divide 80/20 estratificado. |
 | `train.py` | Entrena y compara Regresión Logística (baseline) y Random Forest (3 configuraciones), elige el ganador con una validación interna y guarda los resultados. |
+| `graficas.py` | Curvas ROC y precisión-recall, distribución de probabilidades e importancia de variables. `train.py` la llama al final; también se puede ejecutar sola. |
 | `requirements.txt` | Librerías con versiones fijas (las mismas que usa `ml/serving`). |
 | `entrenar.sh` | Pasos que ejecuta el contenedor: preparar datos y entrenar. |
 | `Dockerfile` | Imagen del job de entrenamiento (`python:3.12-slim`). |
@@ -55,6 +56,16 @@ data/raw/customers.csv ─► preparar_datos.py ─► data/processed/train.csv 
 | `metadata.json` | Versión, umbral, métricas, columnas e importancia de variables. |
 | `experimentos.csv` | Matriz de experimentación. |
 | `matriz_confusion.png` | Matriz de confusión en el conjunto de prueba. |
+| `curva_roc.png` | Curva ROC: Random Forest frente a la regresión logística y al azar. |
+| `curva_precision_recall.png` | Curva precisión-recall con el umbral elegido y la regla manual como referencia. |
+| `distribucion_probabilidades.png` | Probabilidades estimadas según la respuesta real, con el umbral marcado. |
+| `importancia_variables.png` | Las 10 variables con más peso en el modelo. |
+
+Para regenerar solo las gráficas, sin reentrenar:
+
+```bash
+docker compose run --rm --build --user "$(id -u):$(id -g)" training python graficas.py --data /app/data/processed --models /models
+```
 
 ## Reglas
 
