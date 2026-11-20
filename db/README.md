@@ -10,6 +10,13 @@ PostgreSQL ejecuta automáticamente los scripts de `init/`, en orden alfabético
 |---|---|
 | `init/01_schema.sql` | Crea la tabla `customers` (copia fiel de las 53 columnas del CSV), las tablas del sistema (`model_versions`, `predictions`, `coupons`, `contacts`) y la vista `v_entrenamiento`. |
 | `init/02_load_customers.sql` | Carga `data/raw/customers.csv` en `customers` y muestra cuántos clientes se cargaron. |
+| `init/03_dashboard.sql` | Vistas del dashboard: `v_ultima_prediccion` (última predicción de cada cliente) y `v_clientes_dashboard` (cliente + predicción + cupón + `nivel_lealtad` con «Sin nivel»). |
+
+**Si tu base ya existía** antes de `03_dashboard.sql`, aplícalo sin borrar nada:
+
+```bash
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < db/init/03_dashboard.sql
+```
 
 ## Cómo se cargan los datos
 
